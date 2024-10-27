@@ -16,9 +16,14 @@ class Game:
         self.clock = pygame.time.Clock()
         self.player = Player(100, HEIGHT - 50)
         self.obstacles = []
-        self.background_image = pygame.image.load("assets/background.png").convert()
+        self.background_image = pygame.image.load("assets/background.png").convert_alpha()
+        self.background_image = pygame.transform.scale(self.background_image, (WIDTH, HEIGHT))
+        self.background_image2 = pygame.image.load("assets/background2.png").convert_alpha()
+        self.background_image2 = pygame.transform.scale(self.background_image2, (WIDTH, HEIGHT))
+        self.background_image3 = pygame.image.load("assets/background3.png").convert_alpha()
+        self.background_image3 = pygame.transform.scale(self.background_image3, (WIDTH, HEIGHT))
         self.background_scroll = 0
-        self.background_speed = 2
+        self.background_speed = 4
         self.collision_count = 0
         self.max_collisions = 3
 
@@ -75,11 +80,12 @@ class Game:
                     sys.exit()
 
     def draw(self):
+        
+        self.screen.blit(self.background_image3, (0, 0))
+        self.screen.blit(self.background_image2, (self.background_scroll , 0))
+        self.screen.blit(self.background_image2,(self.background_scroll + self.background_image2.get_width(), 0),)
         self.screen.blit(self.background_image, (self.background_scroll, 0))
-        self.screen.blit(
-            self.background_image,
-            (self.background_scroll + self.background_image.get_width(), 0),
-        )
+        self.screen.blit(self.background_image,(self.background_scroll + self.background_image.get_width(), 0),)
 
         self.player.draw(self.screen)
 
