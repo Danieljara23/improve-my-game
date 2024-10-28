@@ -22,10 +22,13 @@ class Game:
         self.background_image2 = pygame.transform.scale(self.background_image2, (WIDTH, HEIGHT))
         self.background_image3 = pygame.image.load("assets/background3.png").convert_alpha()
         self.background_image3 = pygame.transform.scale(self.background_image3, (WIDTH, HEIGHT))
+        self.ground = pygame.image.load("assets/suelo.png").convert_alpha()
+        self.ground = pygame.transform.scale(self.ground,(700,150))
         self.background_scroll = 0
         self.background_speed = 4
         self.collision_count = 0
         self.max_collisions = 3
+        self.ground_scroll = 0
 
     def run(self):
         running = True
@@ -86,6 +89,9 @@ class Game:
         self.screen.blit(self.background_image2,(self.background_scroll + self.background_image2.get_width(), 0),)
         self.screen.blit(self.background_image, (self.background_scroll, 0))
         self.screen.blit(self.background_image,(self.background_scroll + self.background_image.get_width(), 0),)
+        
+        self.screen.blit(self.ground, (-200,350))  # Ajusta la altura para el suelo
+        self.screen.blit(self.ground, (self.background_scroll + self.ground.get_width(), 350))
 
         self.player.draw(self.screen)
 
