@@ -4,6 +4,7 @@ import sys
 from config import HEIGHT, FPS, WHITE, WIDTH, BLACK
 from player import *
 from obstacle import Obstacle
+from objects import *
 
 pygame.font.init()
 font = pygame.font.SysFont(None, 48)
@@ -16,6 +17,7 @@ class Game:
         self.clock = pygame.time.Clock()
         self.player = Player(100, HEIGHT - 50)
         self.obstacles = []
+        self.objects=[]
         self.background_image = pygame.image.load("assets/background/background.png").convert_alpha()
         self.background_image = pygame.transform.scale(self.background_image, (WIDTH, HEIGHT))
         self.background_image2 = pygame.image.load("assets/background/background2.png").convert_alpha()
@@ -26,11 +28,22 @@ class Game:
         # self.ground = pygame.transform.scale(self.ground,(700,150))
         self.background_scroll = 0
         self.background_speed = 4
-        self.collision_count = 0
+        self.life_count = 3
         self.max_collisions = 3
         self.death_count = 0
         self.is_damaged=False
         self.points=0
+        self.obstacle_timer = 0
+        self.life_object_timer = 0
+        self.obstacle_delay = random.randint(30, 60)
+
+    def reset_game(self):
+        self.life_count = 3
+        self.points = 0
+        self.background_speed = 4  # Restablecer la velocidad del fondo
+        self.obstacles.clear()  # Limpiar los obstáculos
+        self.objects.clear()     # Limpiar los objetos de vida
+        self.background_scroll = 0
       
 
     def menu(self,death_count):
@@ -40,13 +53,22 @@ class Game:
 
             if death_count == 0:
                 text = self.draw_text(
-                    "¡Bienvenido a Speedrunner! Presiona cualquier tecla para comenzar",
-                    font, BLACK, self.screen, WIDTH // 2, HEIGHT // 2
+                    "¡Bienvenido a Speedrunner!",
+                    font, BLACK, self.screen, WIDTH // 2, HEIGHT // 2 - 20
                 )
+                text = self.draw_text(
+                    "Presiona cualquier tecla para comenzar",
+                    font, BLACK, self.screen, WIDTH // 2, HEIGHT // 2 +40
+                )
+                
             else:
                 text = self.draw_text(
-                    "¡Perdiste! Presiona cualquier tecla para intentarlo de nuevo",
-                    font, BLACK, self.screen, WIDTH // 2, HEIGHT // 2
+                    "¡Perdiste!",
+                    font, BLACK, self.screen, WIDTH // 2, HEIGHT // 2 - 30
+                )
+                text = self.draw_text(
+                    "Presiona cualquier tecla para intentarlo de nuevo",
+                    font, BLACK, self.screen, WIDTH // 2, HEIGHT // 2+10
                 )
                 score = self.draw_text(
                     f"Puntuación: {self.points}", font, BLACK, self.screen, WIDTH // 2, HEIGHT // 2 + 50
@@ -61,6 +83,7 @@ class Game:
                     sys.exit()
                 if event.type == pygame.KEYDOWN:
                     waiting = False
+                    self.reset_game()
             
             self.clock.tick(FPS)
 
@@ -71,13 +94,29 @@ class Game:
         if self.background_scroll <= -self.background_image.get_width():
             self.background_scroll = 0
 
-        if random.randint(0, 100) < 1:
+        self.obstacle_timer += 1
+        self.life_object_timer += 1
+
+        if self.obstacle_timer > self.obstacle_delay:
             obstacle_x = WIDTH
             obstacle_y = HEIGHT - 70
             self.obstacles.append(Obstacle(obstacle_x, obstacle_y))
+            self.obstacle_timer = 0
+            self.obstacle_delay = random.randint(30, 60)
+        
+        if (self.life_object_timer > 100 and self.life_count <= 2 and self.points >= 300):
+            life_object_x = WIDTH
+            life_object_y = HEIGHT - 70
+            if not any(obstacle.rect.colliderect(pygame.Rect(life_object_x, life_object_y, 40, 40)) for obstacle in self.obstacles):
+                self.objects.append(LifeObject(life_object_x, life_object_y))
+                self.life_object_timer = 0
+      
 
         for obstacle in self.obstacles:
             obstacle.update()
+
+        for life_object in self.objects:
+            life_object.update()
 
         self.obstacles = [
             obstacle
@@ -85,29 +124,43 @@ class Game:
             if obstacle.rect.x + obstacle.rect.width > 0
         ]
 
+        self.objects = [
+            life_object 
+            for life_object in self.objects 
+            if life_object.rect.x + life_object.rect.width > 0
+        ]
+
+
         player_rect = self.player.get_rect()
         for obstacle in self.obstacles:
             if player_rect.colliderect(obstacle.rect):
                 self.player.take_damage()
-                self.collision_count += 1
+                self.life_count -= 1
                 pygame.time.delay(500)
                 self.obstacles.remove(obstacle)
 
-                if self.collision_count >= self.max_collisions:
+                if self.life_count <= 0:
                     self.death_count+=1
                     self.menu(self.death_count)
-                    self.collision_count = 0
+                    self.life_count = 3
                     self.points = 0
+                    self.background_speed
                     pygame.time.wait(2000)
                     return
         else:
             self.score()
         
+        for life_object in self.objects:
+            if player_rect.colliderect(life_object.rect):
+                self.life_count += 1
+                self.objects.remove(life_object)  # Eliminar el objeto de vida
+
+        
     def take_damage(self):
         # """Función para aplicar el daño al jugador."""
         if not self.is_damaged:
             self.is_damaged = True
-            self.player.take_damage()  # Llama a la animación de daño del jugador
+            self.player.take_damage() # Llama a la animación de daño del jugador
             print("Player has taken damage!") 
 
     
@@ -138,8 +191,11 @@ class Game:
         for obstacle in self.obstacles:
             obstacle.draw(self.screen)
 
+        for object in  self.objects:
+            object.draw(self.screen)
+
         self.draw_text(
-            f"Colisiones: {self.collision_count}", font, BLACK, self.screen, 100, 30
+            f"Vidas: {self.life_count}", font, BLACK, self.screen, 100, 30
         )
         self.draw_text(
             f"Puntos: {self.points}", font, BLACK, self.screen, 100, 60

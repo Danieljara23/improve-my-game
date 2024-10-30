@@ -31,7 +31,7 @@ class Player:
             img_jump =pygame.transform.scale(img_jump, (self.width,self.height))
             self.jump_frames.append(img_jump)
 
-        for num3 in range(1,2):
+        for num3 in range(1,3):
             
             img_damage=pygame.image.load(f"assets/player1/damage/Character2F_1_damage_{num3}.png")
             img_damage =pygame.transform.scale(img_damage, (self.width,self.height))
@@ -39,7 +39,7 @@ class Player:
 
         
        
-        self.hitbox_width = 50
+        self.hitbox_width = 40
         self.hitbox_height = 75
 
         self.frame_index = 0
@@ -72,14 +72,17 @@ class Player:
         pygame.time.set_timer(pygame.USEREVENT + 1, 500)  # Temporizador de 500 ms
 
     def handle_event(self, event):
-        if event.type == pygame.USEREVENT + 1:
-            self.is_damaged = False
+     if event.type == pygame.USEREVENT + 1:
+        self.is_damaged = False
 
 
     def draw(self, surface):
 
         if self.is_damaged:
-            frame = self.damage_frames[0]  # Mostrar el primer (y único) frame de daño
+            self.frame_index += self.animation_speed
+            if self.frame_index >= len(self.damage_frames):
+              self.frame_index = 0  # Reinicia la animación al final
+              frame = self.damage_frames[int(self.frame_index)]  # Mostrar el primer (y único) frame de daño
         elif self.on_ground:
             # Animación de correr
             self.frame_index += self.animation_speed
