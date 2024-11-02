@@ -3,7 +3,7 @@ import random
 import sys
 from config import HEIGHT, FPS, WHITE, WIDTH, BLACK
 from player import *
-from obstacle import Obstacle
+from obstacle import *
 from objects import *
 
 pygame.font.init()
@@ -27,7 +27,7 @@ class Game:
         # self.ground = pygame.image.load("assets/suelo.png").convert_alpha()
         # self.ground = pygame.transform.scale(self.ground,(700,150))
         self.background_scroll = 0
-        self.background_speed = 4
+        self.background_speed = 6
         self.life_count = 3
         self.max_collisions = 3
         self.death_count = 0
@@ -35,7 +35,8 @@ class Game:
         self.points=0
         self.obstacle_timer = 0
         self.life_object_timer = 0
-        self.obstacle_delay = random.randint(30, 60)
+        self.obstacle_delay = random.randint(20, 100)
+
 
     def reset_game(self):
         self.life_count = 3
@@ -44,6 +45,7 @@ class Game:
         self.obstacles.clear()  # Limpiar los obstáculos
         self.objects.clear()     # Limpiar los objetos de vida
         self.background_scroll = 0
+        self.player.reset_animation()
       
 
     def menu(self,death_count):
@@ -99,17 +101,21 @@ class Game:
 
         if self.obstacle_timer > self.obstacle_delay:
             obstacle_x = WIDTH
-            obstacle_y = HEIGHT - 70
-            self.obstacles.append(Obstacle(obstacle_x, obstacle_y))
+            obstacle_y = HEIGHT - 100
+            self.obstacles.append(Obstacle(obstacle_x, obstacle_y, self.background_speed))
             self.obstacle_timer = 0
-            self.obstacle_delay = random.randint(30, 60)
+            self.obstacle_delay = random.randint(30, 100)
         
-        if (self.life_object_timer > 100 and self.life_count <= 2 and self.points >= 300):
-            life_object_x = WIDTH
-            life_object_y = HEIGHT - 70
-            if not any(obstacle.rect.colliderect(pygame.Rect(life_object_x, life_object_y, 40, 40)) for obstacle in self.obstacles):
-                self.objects.append(LifeObject(life_object_x, life_object_y))
-                self.life_object_timer = 0
+        if (self.life_object_timer > 100 and self.life_count <= 2 and self.points >= 300 and self.life_count <= 5):
+            max_attempts = 10
+            for _ in range(max_attempts):
+                life_object_x = WIDTH
+                life_object_y = HEIGHT - 100
+                life_object_rect = pygame.Rect(life_object_x, life_object_y, 40, 40,)
+                if not any(life_object_rect.colliderect(obstacle.rect) for obstacle in self.obstacles):
+                    self.objects.append(LifeObject(life_object_x, life_object_y, self.background_speed))
+                    self.life_object_timer = 0
+                    break
       
 
         for obstacle in self.obstacles:
@@ -136,16 +142,15 @@ class Game:
             if player_rect.colliderect(obstacle.rect):
                 self.player.take_damage()
                 self.life_count -= 1
-                pygame.time.delay(500)
+                pygame.time.delay(100)
                 self.obstacles.remove(obstacle)
 
                 if self.life_count <= 0:
+                    self.player.die()
                     self.death_count+=1
+                    pygame.time.wait(1000)
+                    
                     self.menu(self.death_count)
-                    self.life_count = 3
-                    self.points = 0
-                    self.background_speed
-                    pygame.time.wait(2000)
                     return
         else:
             self.score()
@@ -159,9 +164,11 @@ class Game:
     def take_damage(self):
         # """Función para aplicar el daño al jugador."""
         if not self.is_damaged:
-            self.is_damaged = True
             self.player.take_damage() # Llama a la animación de daño del jugador
             print("Player has taken damage!") 
+    
+
+
 
     
     
