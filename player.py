@@ -20,7 +20,6 @@ class Player:
         self.jump_frames = load_spritesheet(
             "assets/player/jump.png", self.width, self.height
         )
-
         self.frame_index = 0
         self.animation_speed = 0.3
 

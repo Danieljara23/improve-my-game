@@ -1,7 +1,7 @@
 import pygame
 from config import RED
 
-
+rect = 0
 class Obstacle:
     def __init__(self, x, y):
         self.rect = pygame.Rect(x, y, 50, 50)
