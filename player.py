@@ -17,10 +17,8 @@ class Player:
         self.run_frames=[]
         self.jump_frames = []
         self.damage_frames=[]
-        self.death_frames=[]
         self.is_damaged = False
-        self.is_dead = False
-        self.damage_duration = 30  # Duración de la animación de daño en frames
+        self.damage_duration = 30  
         self.damage_counter = 0
 
         for num in range (1,8):
@@ -39,12 +37,6 @@ class Player:
             img_damage =pygame.transform.scale(img_damage, (self.width,self.height))
             self.damage_frames.append(img_damage)
 
-        for num4 in range(0,9):
-        
-            img_death=pygame.image.load(f"assets/player1/death/Character2F_1_death_{num3}.png")
-            img_death =pygame.transform.scale(img_death, (self.width,self.height))
-            self.death_frames.append(img_death)
-  
         self.hitbox_width = 40
         self.hitbox_height = 75
 
@@ -71,33 +63,23 @@ class Player:
                 self.is_damaged = False
                 self.damage_counter = 0
     
-    def die(self):
-        self.is_dead = True
-        self.frame_index = 0  
-
     def take_damage(self):
         self.is_damaged = True
         self.damage_counter = 0
-    
+
     def reset_animation(self):
         self.frame_index = 0
         self.is_damaged = False
-        self.is_dead = False
         self.damage_counter = 0
         self.on_ground = True
 
-
-
     def draw(self, surface):
-        if self.is_dead:
-            self.frame_index += self.animation_speed
-            if self.frame_index >= len(self.death_frames):
-                self.frame_index = 0
-        elif self.is_damaged:
+        #animación de daño
+        if self.is_damaged:
             self.frame_index += self.animation_speed
             if self.frame_index >= len(self.damage_frames):
-              self.frame_index = 0  # Reinicia la animación al final
-            frame = self.damage_frames[int(self.frame_index)]  # Mostrar el primer (y único) frame de daño
+              self.frame_index = 0  
+            frame = self.damage_frames[int(self.frame_index)]  
         elif self.on_ground:
             # Animación de correr
             self.frame_index += self.animation_speed
