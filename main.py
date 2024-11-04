@@ -10,4 +10,4 @@ pygame.display.set_caption("Speedrunner")
 
 if __name__ == "__main__":
     game = Game()
-    game.run()
+    game.run()  

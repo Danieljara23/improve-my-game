@@ -30,6 +30,10 @@ class Game:
         self.health_bar_height = 20
         self.health_ratio = self.max_health / self.health_bar_length
         
+        # Propiedades de la puntuación
+        self.score = 0
+        self.score_speed = 1  # Velocidad de incremento de la puntuación
+        
     def draw_health_bar(self):
         x, y = 20, 60
         
@@ -87,15 +91,18 @@ class Game:
         for obstacle in self.obstacles:
             if player_rect.colliderect(obstacle.rect):
                 self.collision_count += 1
-                self.current_health -= 20  # Reduce salud en 20 puntos por colisión
+                self.current_health -= self.max_health / self.max_collisions  # Reduce salud en 33.3333 puntos por colisión
                 self.obstacles.remove(obstacle)
                 
                 if self.collision_count >= self.max_collisions or self.current_health <= 0:
-                    self.draw_text("¡Perdiste!", font, BLACK, self.screen, WIDTH // 2, HEIGHT // 2)
+                    self.draw_text(f"¡Perdiste! Puntuación: {self.score}", font, BLACK, self.screen, WIDTH // 2, HEIGHT // 2)
                     pygame.display.flip()
-                    pygame.time.wait(2000)
+                    pygame.time.wait(4000)
                     pygame.quit()
                     sys.exit()
+
+        # Actualizar puntuación
+        self.score += self.score_speed
 
     def draw(self):
         # Dibujar fondo
@@ -107,8 +114,9 @@ class Game:
         for obstacle in self.obstacles:
             obstacle.draw(self.screen)
 
-        # Dibujar texto de colisiones y barra de salud
+        # Dibujar texto de colisiones, puntuación y barra de salud
         self.draw_text(f"Colisiones: {self.collision_count}", font, BLACK, self.screen, 100, 30)
+        self.draw_text(f"Puntuación: {self.score}", font, BLACK, self.screen, WIDTH - 150, 30)
         self.draw_health_bar()
 
     def draw_text(self, text, font, color, surface, x, y):
