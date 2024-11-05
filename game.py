@@ -19,8 +19,10 @@ class Game:
         self.background_image = pygame.image.load("assets/background.png").convert()
         self.background_scroll = 0
         self.background_speed = 2
-        self.collision_count = 0
-        self.max_collisions = 3
+
+        # Inicializar puntuación y vidas
+        self.score = 0
+        self.lives = 3
 
     def run(self):
         running = True
@@ -51,21 +53,14 @@ class Game:
             obstacle_y = HEIGHT - 50
             self.obstacles.append(Obstacle(obstacle_x, obstacle_y))
 
-        for obstacle in self.obstacles:
+        for obstacle in self.obstacles[:]:
             obstacle.update()
 
-        self.obstacles = [
-            obstacle
-            for obstacle in self.obstacles
-            if obstacle.rect.x + obstacle.rect.width > 0
-        ]
-
-        player_rect = self.player.get_rect()
-        for obstacle in self.obstacles:
-            if player_rect.colliderect(obstacle.rect):
-                self.collision_count += 1
+            # Chequeo de colisión
+            if self.player.get_rect().colliderect(obstacle.rect):
+                self.lives -= 1
                 self.obstacles.remove(obstacle)
-                if self.collision_count >= self.max_collisions:
+                if self.lives <= 0:
                     self.draw_text(
                         "¡Perdiste!", font, BLACK, self.screen, WIDTH // 2, HEIGHT // 2
                     )
@@ -73,6 +68,11 @@ class Game:
                     pygame.time.wait(2000)
                     pygame.quit()
                     sys.exit()
+
+            # Sumar puntuación si el obstáculo pasa sin colisionar
+            if obstacle.rect.right < 0:
+                self.score += 10  # Incrementar puntuación
+                self.obstacles.remove(obstacle)
 
     def draw(self):
         self.screen.blit(self.background_image, (self.background_scroll, 0))
@@ -86,12 +86,12 @@ class Game:
         for obstacle in self.obstacles:
             obstacle.draw(self.screen)
 
-        self.draw_text(
-            f"Colisiones: {self.collision_count}", font, BLACK, self.screen, 100, 30
-        )
+        # Ajustar la posición de la puntuación y las vidas
+        self.draw_text(f"Puntuación: {self.score}", font, BLACK, self.screen, 20, 20)  # Ajustado
+        self.draw_text(f"Vidas: {self.lives}", font, BLACK, self.screen, WIDTH - 150, 20)  # Ajustado
 
     def draw_text(self, text, font, color, surface, x, y):
         textobj = font.render(text, True, color)
         textrect = textobj.get_rect()
-        textrect.center = (x, y)
+        textrect.topleft = (x, y)  # Cambié a .topleft para posicionar correctamente
         surface.blit(textobj, textrect)
