@@ -20,7 +20,11 @@ class Game:
         self.background_scroll = 0
         self.background_speed = 2
         self.collision_count = 0
-        self.max_collisions = 3
+        self.max_collisions = 12
+        self.lives = 3
+        self.health = 100
+        self.max_health = 100
+        self.collision_damage = 20
         self.score = 0
 
     def run(self):
@@ -64,12 +68,14 @@ class Game:
         player_rect = self.player.get_rect()
         for obstacle in self.obstacles:
             if player_rect.colliderect(obstacle.rect):
-                self.collision_count += 1
-                self.obstacles.remove(obstacle)
-                if self.collision_count >= self.max_collisions:
-                    self.draw_text(
-                        "¡Perdiste!", font, BLACK, self.screen, WIDTH // 2, HEIGHT // 2
-                    )
+                self.health -= self.collision_damage  # Reducir salud
+                self.obstacles.remove(obstacle)  # Elimina obstáculo después de colisión
+            if self.health <= 0:
+                self.lives -= 1  # Reduce una vida
+                self.health = self.max_health  # Restablece la salud
+
+                if self.lives <= 0:
+                    self.draw_text("¡Perdiste!", font, BLACK, self.screen, WIDTH // 2, HEIGHT // 2)
                     pygame.display.flip()
                     pygame.time.wait(2000)
                     pygame.quit()
@@ -89,13 +95,11 @@ class Game:
 
         for obstacle in self.obstacles:
             obstacle.draw(self.screen)
-
-        self.draw_text(
-            f"Colisiones: {self.collision_count}", font, BLACK, self.screen, 100, 30
-        )
-        self.draw_text(
-            f"Puntaje: {self.score}", font, BLACK, self.screen, 350, 30
-        )
+        
+        
+        self.draw_text(f"Vidas: {self.lives}", font, BLACK, self.screen, 100, 30)
+        self.draw_text(f"Salud: {self.health}/{self.max_health}", font, BLACK, self.screen, 125, 60)
+        self.draw_text(f"Puntaje: {self.score}", font, BLACK, self.screen, 350, 30)
 
     def draw_text(self, text, font, color, surface, x, y):
         textobj = font.render(text, True, color)
