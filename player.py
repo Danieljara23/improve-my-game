@@ -23,6 +23,30 @@ class Player:
 
         self.frame_index = 0
         self.animation_speed = 0.3
+        
+
+        # Se incluye la variable de salud en la interfaz
+        self.max_health = 3
+        self.current_health = self.max_health
+        self.heart_image = pygame.image.load("assets/heart_asset.png").convert_alpha()
+        self.heart_image = pygame.transform.scale(self.heart_image, (24, 24))
+
+    # Definir método para reducir la salud
+    def damage(self):
+        self.current_health -= 1
+        return self.current_health <= 0
+    
+    # Definir método para "curarse"
+    def heal(self):
+        if self.current_health < self.max_health:
+            self.current_health += 1
+            return True
+        return False
+    
+    # Se dibuja la salud en la interfaz
+    def draw_health(self, surface):
+        for i in range(self.current_health):
+            surface.blit(self.heart_image, (10 + i * 30, 10))
 
     def update(self):
         keys = pygame.key.get_pressed()
