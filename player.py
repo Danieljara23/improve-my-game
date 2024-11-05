@@ -14,6 +14,7 @@ class Player:
         self.gravity = 1
         self.velocity_y = 0
         self.on_ground = True
+        self.lives = 3  # Inicializa las vidas
         self.run_frames = load_spritesheet(
             "assets/player/run.png", self.width, self.height
         )
@@ -49,3 +50,7 @@ class Player:
 
     def get_rect(self):
         return pygame.Rect(self.x, self.y, self.width, self.height)
+
+    def draw_health_lives(self, screen, font):
+        lives_text = font.render(f"Lives: {self.lives}", True, (255, 255, 255))
+        screen.blit(lives_text, (10, 70))
