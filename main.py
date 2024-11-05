@@ -1,4 +1,7 @@
 import pygame
+import os
+print("Current working directory:", os.getcwd())
+
 
 from game import Game
 from config import WIDTH, HEIGHT
